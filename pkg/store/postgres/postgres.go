@@ -10,6 +10,8 @@ import (
 	"github.com/pkg/errors"
 )
 
+const maxCon = 100
+
 type Repo struct {
 	cfg config.Postgres
 
@@ -21,6 +23,8 @@ func New(ctx context.Context, cfg config.Postgres) (*Repo, error) {
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
+
+	c.MaxConns = maxCon
 
 	dbpool, err := pgxpool.ConnectConfig(ctx, c)
 	if err != nil {
