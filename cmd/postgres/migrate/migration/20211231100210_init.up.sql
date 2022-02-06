@@ -1,6 +1,4 @@
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
-BEGIN;
+-- CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE IF NOT EXISTS "balance"
 (
     "accountId"      INT8   NOT NULL PRIMARY KEY,
@@ -13,7 +11,7 @@ CREATE TABLE IF NOT EXISTS "balance"
 
 CREATE TABLE IF NOT EXISTS "journal"
 (
-    "id"              UUID     DEFAULT gen_random_uuid(), -- _id
+    "id"              UUID     NOT NULL, -- _id
     "id2"             bytea       NOT NULL,               -- id
     "accountId"       INT8        NOT NULL,
     "created_at"      TIMESTAMP   NOT NULL,
@@ -68,4 +66,3 @@ $$
             END LOOP;
     END
 $$;
-COMMIT;

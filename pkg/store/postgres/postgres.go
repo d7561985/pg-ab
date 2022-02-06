@@ -5,6 +5,7 @@ import (
 
 	"github.com/d7561985/mongo-ab/pkg/changing"
 	"github.com/d7561985/pb-ab/internal/config"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/pkg/errors"
 )
@@ -68,12 +69,12 @@ func (s *Repo) UpdateTX(ctx context.Context, in changing.Transaction) (_ interfa
 	}
 
 	j := NewJournal(b, in)
-	sq := `INSERT INTO journal("id2","accountId","balance","change","currency","created_at","depositAllSum","depositCount",
+	sq := `INSERT INTO journal("id","id2","accountId","balance","change","currency","created_at","depositAllSum","depositCount",
                 "pincoinBalance","pincoinAllSum","pincoinChange","project","revert","transactionId",
                 "transactionBson", "transactionType"
-            ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15, $16)`
+            ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15, $16, $17)`
 	_, err = tx.Exec(ctx, sq,
-		j.ID2, j.AccountID, j.Balance.Balance, j.Change, j.Currency, j.Date, j.DepositAllSum, j.DepositCount,
+		uuid.New(), j.ID2, j.AccountID, j.Balance.Balance, j.Change, j.Currency, j.Date, j.DepositAllSum, j.DepositCount,
 		j.PincoinBalance, j.PincoinsAllSum, j.PincoinChange, j.Project, j.Revert, j.TransactionID,
 		j.TransactionIDBson, j.TransactionType,
 	)
@@ -85,12 +86,12 @@ func (s *Repo) UpdateTX(ctx context.Context, in changing.Transaction) (_ interfa
 }
 
 func (s *Repo) Insert(ctx context.Context, j Journal) error {
-	sq := `INSERT INTO journal("id2","accountId","balance","change","currency","created_at","depositAllSum","depositCount",
+	sq := `INSERT INTO journal("id","id2","accountId","balance","change","currency","created_at","depositAllSum","depositCount",
                 "pincoinBalance","pincoinAllSum","pincoinChange","project","revert","transactionId",
                 "transactionBson", "transactionType"
-            ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15, $16)`
+            ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15, $16, $17)`
 	_, err := s.pool.Exec(ctx, sq,
-		j.ID2, j.AccountID, j.Balance.Balance, j.Change, j.Currency, j.Date, j.DepositAllSum, j.DepositCount,
+		uuid.New(), j.ID2, j.AccountID, j.Balance.Balance, j.Change, j.Currency, j.Date, j.DepositAllSum, j.DepositCount,
 		j.PincoinBalance, j.PincoinsAllSum, j.PincoinChange, j.Project, j.Revert, j.TransactionID,
 		j.TransactionIDBson, j.TransactionType,
 	)
