@@ -97,3 +97,60 @@ ORDER BY total_bytes DESC;
 ```
 
 SO: 8184045568 / 33506400 = `244.253204403` average
+
+TEST1:
+PG14 instance: r5d.2xlarge x1 with xfs nvme 300SSD
+Client:  c6g.xlarge	
+
+Disc usage:
+```bash
+93G/data/pg_wal
+187G/data/base
+279G/data
+```
+
+usage sql:
+```json
+
+[
+  {
+    "table_schema": "public",
+    "table_name": "journal",
+    "row_estimate": 686334530,
+    "total": "187 GB",
+    "index": "48 GB",
+    "toast": "488 kB",
+    "table": "138 GB"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "balance",
+    "row_estimate": 100012,
+    "total": "11 MB",
+    "index": "2800 kB",
+    "toast": null,
+    "table": "8304 kB"
+  }
+]
+```
+
+```bash
+comb/sec: 19874.121340583017 duration: 30389.452879444 603963674
+comb/sec: 19873.701633273387 duration: 30390.452978765 603970795
+comb/sec: 19873.654040522124 duration: 30391.453618367 603989235
+2022/02/07 02:56:40 worker fn ERROR: could not extend file "base/16385/16409.28": No space left on device (SQLSTATE 53100)
+github.com/d7561985/pb-ab/pkg/store/postgres.(*Repo).Insert
+/Users/dzmitryharupa/Documents/git/d7561985/pg-ab/pkg/store/postgres/postgres.go:103
+github.com/d7561985/pb-ab/cmd/postgres.(*postgresCommand).Action.func1
+/Users/dzmitryharupa/Documents/git/d7561985/pg-ab/cmd/postgres/postgres.go:81
+github.com/d7561985/mongo-ab/pkg/worker.(*services).work
+/Users/dzmitryharupa/go/pkg/mod/github.com/d7561985/mongo-ab@v0.0.0-20220206110900-3a9d12c987d7/pkg/worker/worker.go:84
+runtime.goexit
+```
+
+## Overall
+
+| Test | Insert per sec | Element Count | Element Size + Index | Element Size No Index | actual DU <br/>(+wal file) | Size<br/>SQL Script |
+|------|-------------|---------------|----------------------|-----------------------|-----------------------|---------------------|
+| #1   |  19873      | 686334530        | 292                  | 215                   | 279G                  | 187G                |
+|      |             | Paragraph     | Text                 |                       |                       |                     |
