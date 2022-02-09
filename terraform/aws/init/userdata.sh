@@ -27,6 +27,7 @@ sudo -u postgres /usr/pgsql-14/bin/initdb -D /data
 sudo vim /usr/lib/systemd/system/postgresql-14.service
 # copy cfg to /var/lib/pgsql/14/data/postgresql.conf
 sudo systemctl daemon-reload
+# echo "host all all 0.0.0.0/0 trust" >> /data/pg_hba.conf
 sudo systemctl enable --now postgresql-14
 # psql
 # CREATE ROLE test WITH LOGIN PASSWORD 'test';

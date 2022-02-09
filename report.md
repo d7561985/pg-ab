@@ -17,6 +17,18 @@ effective_cache_size = 36GB
 default_statistics_target = 200
 ```
 
+Recommended values if PostgreSQL is on a separate server (http://help.collab.net/index.jsp?topic=/teamforge174/faq/pgsqldefaults.html)
+
+| site-options.conf tokens	                | 8GB RAM	                   | 16GB RAM	            | 32GB RAM	       | 64GB RAM	  | 128GB RAM |
+|------------------------------------------|----------------------------|----------------------|-----------------|------------|-----------|
+| PGSQL_EFFECTIVE_CACHE_SIZE<br/>effective_cache_size               | 	6GB                       | 	12GB                | 	24GB           | 	48GB      | 	96GB     |
+| PGSQL_SHARED_BUFFERS<br/>shared_buffers                     | 	2GB                       | 	4GB                 | 	8GB            | 	8GB       | 	8GB      |
+| PGSQL_WORK_MEM<br/>work_mem| 	64 MB| 	64MB| 	64MB| 	64MB| 	64MB     |
+|PGSQL_WAL_BUFFERS<br/>wal_buffers|	16 MB|	32MB|	32MB|	32MB|	32MB|
+|PGSQL_MAINTENANCE_WORK_MEM<br/>maintenance_work_mem|	256MB|	615MB|	615MB|	615MB|	615MB|
+
+NOTE: wal_buffers = -1 is OK? 
+
 usage via sql:
 ```sql
 WITH RECURSIVE pg_inherit(inhrelid, inhparent) AS
@@ -149,7 +161,7 @@ runtime.goexit
 ```
 
 ## TEST2
-PG14 instance: r5d.2xlarge x1 with zfs nvme 300SSD
+PG14 instance: r5d.2xlarge x1 with xfs nvme 300SSD
 Client:  c6g.xlarge
 
 Test wal file 2GB only
@@ -198,6 +210,20 @@ github.com/d7561985/pb-ab/pkg/store/postgres.(*Repo).Insert
 github.com/d7561985/pb-ab/cmd/postgres.(*postgresCommand).Action.func1
 /Users/dzmitryharupa/Documents/git/d7561985/pg-ab/cmd/postgres/postgres.go:81
 ```
+
+## TEST3
+PG14 instance: r5d.2xlarge x1 with xfs nvme 300SSD
+Client:  c6g.xlarge
+
+Test config optimize for 64GB ram
+``
+effective_cache_size = 24GB
+shared_buffers = 8GB
+work_mem = 64MB
+wal_buffers = 32MB
+maintenance_work_mem = 64GB
+``
+
 ## Overall
 | Test | Insert per sec | Element Count | actual DU <br/>(+wal file) | Size<br/>SQL Script |
 |------|-------------|-----------------------|----------------------------|---------------------|
