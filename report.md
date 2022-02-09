@@ -98,7 +98,7 @@ ORDER BY total_bytes DESC;
 
 SO: 8184045568 / 33506400 = `244.253204403` average
 
-TEST1:
+## TEST1:
 PG14 instance: r5d.2xlarge x1 with xfs nvme 300SSD
 Client:  c6g.xlarge	
 
@@ -148,9 +148,58 @@ github.com/d7561985/mongo-ab/pkg/worker.(*services).work
 runtime.goexit
 ```
 
-## Overall
+## TEST2
+PG14 instance: r5d.2xlarge x1 with zfs nvme 300SSD
+Client:  c6g.xlarge
 
-| Test | Insert per sec | Element Count | Element Size + Index | Element Size No Index | actual DU <br/>(+wal file) | Size<br/>SQL Script |
-|------|-------------|---------------|----------------------|-----------------------|-----------------------|---------------------|
-| #1   |  19873      | 686334530        | 292                  | 215                   | 279G                  | 187G                |
-|      |             | Paragraph     | Text                 |                       |                       |                     |
+Test wal file 2GB only
+``
+max_wal_size = 2GB
+``
+Disc usage:
+```bash
+[ec2-user@ip-172-31-18-67 ~]$ sudo du -h /data
+2.1G	/data/pg_wal
+252G	/data/base
+254G	/data
+```
+SQL:
+```json
+[
+  {
+    "table_schema": "public",
+    "table_name": "journal",
+    "row_estimate": 975796480,
+    "total": "251 GB",
+    "index": "65 GB",
+    "toast": "488 kB",
+    "table": "187 GB"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "balance",
+    "row_estimate": 162545,
+    "total": "144 MB",
+    "index": "18 MB",
+    "toast": null,
+    "table": "125 MB"
+  }
+]
+```
+
+Client last output:
+```bash
+comb/sec: 7682.789228416651 duration: 47269.850076942 363164295
+comb/sec: 7682.626697358746 duration: 47270.850101939 363164295
+comb/sec: 7682.464172506588 duration: 47271.850131064 363164295
+2022/02/08 22:00:08 worker fn PANIC: could not write to file "pg_wal/xlogtemp.27512": No space left on device (SQLSTATE 53100)
+github.com/d7561985/pb-ab/pkg/store/postgres.(*Repo).Insert
+/Users/dzmitryharupa/Documents/git/d7561985/pg-ab/pkg/store/postgres/postgres.go:103
+github.com/d7561985/pb-ab/cmd/postgres.(*postgresCommand).Action.func1
+/Users/dzmitryharupa/Documents/git/d7561985/pg-ab/cmd/postgres/postgres.go:81
+```
+## Overall
+| Test | Insert per sec | Element Count | actual DU <br/>(+wal file) | Size<br/>SQL Script |
+|------|-------------|-----------------------|----------------------------|---------------------|
+| #1   |  19873      | 686334530        |  279G                      | 187G                |
+| #2   |  7682           | 975796480     |  254GB                      | 251GB               |

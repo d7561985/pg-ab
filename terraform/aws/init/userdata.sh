@@ -7,7 +7,7 @@ enabled=1
 gpgcheck=0
 EOF
 sudo yum makecache
-sudo yum install postgresql14 postgresql14-server postgresql-contrib
+sudo yum install -y postgresql14 postgresql14-server postgresql-contrib
 
 
 # mount ssd
@@ -23,8 +23,13 @@ sudo chown postgres:postgres /data
 LC_ALL="en_US.UTF-8"
 LC_CTYPE="en_US.UTF-8"
 sudo -u postgres /usr/pgsql-14/bin/initdb -D /data
+# change Environment=PGDATA=/var/lib/pgsql/14/data/
+sudo vim /usr/lib/systemd/system/postgresql-14.service
+# copy cfg to /var/lib/pgsql/14/data/postgresql.conf
+sudo systemctl daemon-reload
+sudo systemctl enable --now postgresql-14
 # psql
 # CREATE ROLE test WITH LOGIN PASSWORD 'test';
 # ALTER USER test WITH SUPERUSER;
-sudo systemctl enable --now postgresql-14
-pg_ctl -D /data initdb
+# CREATE DATABASE db;
+
