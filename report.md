@@ -216,16 +216,65 @@ PG14 instance: r5d.2xlarge x1 with xfs nvme 300SSD
 Client:  c6g.xlarge
 
 Test config optimize for 64GB ram
-``
+```
+effective_cache_size = 36GB
+shared_buffers = 12GB
+#work_mem = 4MB
+#wal_buffers = -1
+#maintenance_work_mem = 64MB
+```
+=>
+```
 effective_cache_size = 24GB
 shared_buffers = 8GB
 work_mem = 64MB
 wal_buffers = 32MB
 maintenance_work_mem = 64GB
-``
+```
+
+Disc usage:
+```bash
+[ec2-user@ip-172-31-25-165 ~]$ sudo du -h /data
+89G	/data/pg_wal
+187G	/data/base
+275G	/data
+```
+
+SQL:
+```json
+[
+  {
+    "table_schema": "public",
+    "table_name": "journal",
+    "row_estimate": 750483010,
+    "total": "186 GB",
+    "index": "48 GB",
+    "toast": "488 kB",
+    "table": "138 GB"
+  },
+  {
+    "table_schema": "pg_catalog",
+    "table_name": "pg_statistic",
+    "row_estimate": 1447,
+    "total": "4536 kB",
+    "index": "80 kB",
+    "toast": "3048 kB",
+    "table": "1408 kB"
+  }
+]
+```
+
+Client last output:
+```bash
+comb/sec: 19221.93291823457 duration: 39046.752644111 750554060
+comb/sec: 19221.440621132 duration: 39047.752704594 750554060
+comb/sec: 19220.948355159577 duration: 39048.752753062 750554060
+2022/02/09 18:54:23 worker fn ERROR: could not extend file "base/16385/16410.19": No space left on device (SQLSTATE 53100)
+```
 
 ## Overall
 | Test | Insert per sec | Element Count | actual DU <br/>(+wal file) | Size<br/>SQL Script |
 |------|-------------|-----------------------|----------------------------|---------------------|
 | #1   |  19873      | 686334530        |  279G                      | 187G                |
 | #2   |  7682           | 975796480     |  254GB                      | 251GB               |
+| #3 | 19221 | 750483010 | 275G| 186 GB|
