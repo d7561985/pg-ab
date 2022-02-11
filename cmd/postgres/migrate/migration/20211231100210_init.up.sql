@@ -1,4 +1,3 @@
--- CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE IF NOT EXISTS "balance"
 (
     "accountId"      INT8   NOT NULL PRIMARY KEY,
@@ -9,26 +8,26 @@ CREATE TABLE IF NOT EXISTS "balance"
     "pincoinAllSum"  float4 NOT NULL CHECK ( "pincoinAllSum" >= 0 )
 );
 
+CREATE TYPE JOURNAL_OPERATION as enum('None', 'Add Deposit', 'Write bet', 'FreebetWin', 'Withdraw', 'LotteryWin', 'Welcome deposit', 'Revert');
+CREATE TYPE PROJECT as enum ('undefined', 'casino', 'sport');
+
 CREATE TABLE IF NOT EXISTS "journal"
 (
-    "id"              UUID     NOT NULL, -- _id
-    "id2"             bytea       NOT NULL,               -- id
+    "id"              bytea       NOT NULL,               -- bsonId
+    "transactionId"   bytea       NOT NULL,  -- contains INI | Bson
     "accountId"       INT8        NOT NULL,
-    "created_at"      TIMESTAMP   NOT NULL,
+    "created_at"      TIMESTAMP WITH TIME ZONE NOT NULL,
     "balance"         FLOAT8   DEFAULT NULL,
-    "depositAllSum"   FLOAT8   DEFAULT NULL,
-    "depositCount"    INT      DEFAULT NULL,
     "pincoinBalance"  FLOAT8   DEFAULT NULL,
-    "pincoinAllSum"   FLOAT8   DEFAULT NULL,
     "change"          FLOAT4   DEFAULT NULL,
     "pincoinChange"   FLOAT4   DEFAULT NULL,
     "currency"        SMALLINT DEFAULT NULL,
-    "project"         VARCHAR(64) NOT NULL,
-    "revert"          BOOLEAN  DEFAULT NULL,
-    "transactionId"   INT8        NOT NULL,
-    "transactionBson" bytea       NOT NULL,
-    "transactionType" VARCHAR(36) NOT NULL
+    "project"         PROJECT NOT NULL,
+    "type"            JOURNAL_OPERATION NOT NULL,
+    "revert"          BOOLEAN  DEFAULT NULL
 ) PARTITION BY RANGE (created_at);
+
+COMMENT ON COLUMN journal."transactionId" IS 'inside byte we can store both bson and INT identification. For INT we use binary.LittleEndian conversion';
 
 CREATE INDEX IF NOT EXISTS journal_id_idx ON journal (id);
 CREATE INDEX IF NOT EXISTS journal_created_at_idx ON journal (created_at);

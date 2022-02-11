@@ -12,6 +12,7 @@ import (
 	fuzz "github.com/google/gofuzz"
 	"github.com/pkg/errors"
 	"github.com/urfave/cli/v2"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 const defMaxUserID = 100_000
@@ -76,7 +77,11 @@ func (m *postgresCommand) Action(c *cli.Context) error {
 	case Insert:
 		w.Run(c.Context, func() error {
 			tx := genRequest(uint64(rand.Int()%c.Int(fMaxUser)), 100)
-			j := postgres.NewJournal(postgres.Balance{AccountID: tx.AccountID}, tx)
+			j := postgres.NewJournal(postgres.Balance{
+				AccountID:      tx.AccountID,
+				Balance:        float64(rand.Int63()),
+				PincoinBalance: float64(rand.Int63()),
+			}, tx)
 
 			return errors.WithStack(repo.Insert(context.TODO(), j))
 		})
@@ -107,6 +112,19 @@ func genRequest(usr uint64, add float64) changing.Transaction {
 	tx.AccountID = usr
 	tx.Currency = 123
 	tx.Change = add
-	tx.TransactionID = uint64(rand.Int63())
+
+	switch rand.Int63() % 2 {
+	case 0:
+		tx.TransactionID = uint64(rand.Int63())
+	case 1:
+		tx.TransactionIDBson = primitive.NewObjectID()
+		tx.TransactionID = 0
+	}
+
+	tx.Project = []string{"casino", "sport", primitive.NewObjectID().String()}[rand.Int63()%3]
+	tx.Type = []string{
+		"None", "Add Deposit", "Write bet", "FreebetWin", "Withdraw", "LotteryWin", "Welcome deposit", "Revert",
+	}[rand.Int63()%8]
+
 	return tx
 }

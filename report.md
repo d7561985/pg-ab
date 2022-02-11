@@ -1,5 +1,39 @@
 # Postgres
 
+schema:
+```sql
+CREATE TABLE IF NOT EXISTS "balance"
+(
+    "accountId"      INT8   NOT NULL PRIMARY KEY,
+    "balance"        float4 NOT NULL,
+    "depositAllSum"  float4 NOT NULL CHECK ( "depositAllSum" >= 0),
+    "depositCount"   INT    NOT NULL,
+    "pincoinBalance" float4 NOT NULL CHECK ( "pincoinBalance" >= 0 ),
+    "pincoinAllSum"  float4 NOT NULL CHECK ( "pincoinAllSum" >= 0 )
+);
+
+CREATE TABLE IF NOT EXISTS "journal"
+(
+    "id"              UUID     NOT NULL,
+    "id2"             bytea       NOT NULL,
+    "accountId"       INT8        NOT NULL,
+    "created_at"      TIMESTAMP   NOT NULL,
+    "balance"         FLOAT8   DEFAULT NULL,
+    "depositAllSum"   FLOAT8   DEFAULT NULL,
+    "depositCount"    INT      DEFAULT NULL,
+    "pincoinBalance"  FLOAT8   DEFAULT NULL,
+    "pincoinAllSum"   FLOAT8   DEFAULT NULL,
+    "change"          FLOAT4   DEFAULT NULL,
+    "pincoinChange"   FLOAT4   DEFAULT NULL,
+    "currency"        SMALLINT DEFAULT NULL,
+    "project"         VARCHAR(64) NOT NULL,
+    "revert"          BOOLEAN  DEFAULT NULL,
+    "transactionId"   INT8        NOT NULL,
+    "transactionBson" bytea       NOT NULL,
+    "transactionType" VARCHAR(36) NOT NULL
+) PARTITION BY RANGE (created_at);
+```
+
 config:
 ```
 max_connections = 600
@@ -272,9 +306,58 @@ comb/sec: 19220.948355159577 duration: 39048.752753062 750554060
 2022/02/09 18:54:23 worker fn ERROR: could not extend file "base/16385/16410.19": No space left on device (SQLSTATE 53100)
 ```
 
+## TEST4
+PG14 instance: r5d.2xlarge x1 with xfs nvme 300SSD
+Client:  c6g.2xlarge
+Simplify SQL schema (use 2 enum types + bytea ) + rid of obsolete fields:
+
+```sql
+CREATE TABLE IF NOT EXISTS "journal"
+(
+    "id"              UUID     NOT NULL,
+    "id2"             bytea       NOT NULL,
+    "accountId"       INT8        NOT NULL,
+    "created_at"      TIMESTAMP   NOT NULL,
+    "balance"         FLOAT8   DEFAULT NULL,
+    "depositAllSum"   FLOAT8   DEFAULT NULL,
+    "depositCount"    INT      DEFAULT NULL,
+    "pincoinBalance"  FLOAT8   DEFAULT NULL,
+    "pincoinAllSum"   FLOAT8   DEFAULT NULL,
+    "change"          FLOAT4   DEFAULT NULL,
+    "pincoinChange"   FLOAT4   DEFAULT NULL,
+    "currency"        SMALLINT DEFAULT NULL,
+    "project"         VARCHAR(64) NOT NULL,
+    "revert"          BOOLEAN  DEFAULT NULL,
+    "transactionId"   INT8        NOT NULL,
+    "transactionBson" bytea       NOT NULL,
+    "transactionType" VARCHAR(36) NOT NULL
+) PARTITION BY RANGE (created_at);
+```
+=>
+```sql
+CREATE TABLE IF NOT EXISTS "journal"
+(
+    "id"              bytea       NOT NULL,
+    "transactionId"   bytea       NOT NULL,
+    "accountId"       INT8        NOT NULL,
+    "created_at"      TIMESTAMP WITH TIME ZONE NOT NULL,
+    "balance"         FLOAT8   DEFAULT NULL,
+    "pincoinBalance"  FLOAT8   DEFAULT NULL,
+    "change"          FLOAT4   DEFAULT NULL,
+    "pincoinChange"   FLOAT4   DEFAULT NULL,
+    "currency"        SMALLINT DEFAULT NULL,
+    "project"         PROJECT NOT NULL,
+    "type"            JOURNAL_OPERATION NOT NULL,
+    "transactionType" VARCHAR(36) NOT NULL,
+    "revert"          BOOLEAN  DEFAULT NULL
+) PARTITION BY RANGE (created_at);
+```
+
+
 ## Overall
 | Test | Insert per sec | Element Count | actual DU <br/>(+wal file) | Size<br/>SQL Script |
 |------|-------------|-----------------------|----------------------------|---------------------|
 | #1   |  19873      | 686334530        |  279G                      | 187G                |
 | #2   |  7682           | 975796480     |  254GB                      | 251GB               |
 | #3 | 19221 | 750483010 | 275G| 186 GB|
+

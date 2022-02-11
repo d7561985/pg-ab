@@ -17,9 +17,6 @@ func TestNew(t *testing.T) {
 		Addr: "postgresql://postgres@localhost/db"})
 	require.NoError(t, err)
 
-	err = repo.Setup(context.Background())
-	require.NoError(t, err)
-
 	req := genRequest(1, 100)
 	b, err := repo.UpdateTX(context.Background(), req)
 
