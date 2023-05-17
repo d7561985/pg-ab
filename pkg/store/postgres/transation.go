@@ -12,12 +12,12 @@ const sizeUint64 = int(unsafe.Sizeof(uint64(0)))
 
 type Balance struct {
 	AccountID     uint64
-	Balance       float64
-	DepositAllSum float64
+	Balance       int
+	DepositAllSum int
 	DepositCount  int32
 
-	PincoinBalance float64
-	PincoinsAllSum float64
+	PincoinBalance int
+	PincoinsAllSum int
 }
 
 type Journal struct {
@@ -29,11 +29,11 @@ type Journal struct {
 
 	CreatedAt time.Time
 
-	Balance float64
-	Change  float32
+	Balance int
+	Change  int32
 
-	PincoinBalance float64
-	PincoinChange  float32
+	PincoinBalance int
+	PincoinChange  int32
 
 	Type OpType
 
@@ -57,9 +57,9 @@ func NewJournal(b Balance, in changing.Transaction) Journal {
 		CreatedAt: time.Now(),
 
 		Balance:        b.Balance,
-		Change:         float32(in.Change),
+		Change:         int32(in.Change),
 		PincoinBalance: b.PincoinBalance,
-		PincoinChange:  float32(in.PincoinChange),
+		PincoinChange:  int32(in.PincoinChange),
 
 		Type:     NewOperationType(in.Type),
 		Project:  NewProject(in.Project),

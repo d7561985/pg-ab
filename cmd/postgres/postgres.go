@@ -79,8 +79,8 @@ func (m *postgresCommand) Action(c *cli.Context) error {
 			tx := genRequest(uint64(rand.Int()%c.Int(fMaxUser)), 100)
 			j := postgres.NewJournal(postgres.Balance{
 				AccountID:      tx.AccountID,
-				Balance:        float64(rand.Int63()),
-				PincoinBalance: float64(rand.Int63()),
+				Balance:        int(rand.Int63()),
+				PincoinBalance: int(rand.Int63()),
 			}, tx)
 
 			return errors.WithStack(repo.Insert(context.TODO(), j))
