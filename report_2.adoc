@@ -1,0 +1,31 @@
+= RDS ServerlesV2
+
+== Test 1
+Aurora Standard - APU = 8
+Client - 2xc7g.xlarge
+
+== Test 2
+Aurora Standard  - APU = 64
+Client - 2xc7g.xlarge
+
+== Test 3
+Aurora Standard  - APU = 64
+Client - 3xc7g.xlarge
+
+== Test 4
+Aurora Standard  - APU = 64
+Client - 4xc7g.xlarge
+
+== Test 5
+Aurora Standard  - APU = 128
+Client - 4xc7g.xlarge
+
+|===
+|Test |Insert per sec |Element Count |Data size | Rer row cost
+
+|#1 |1075 + 1113 |-  |- | -
+|#2 |3951 + 4000 |-  |- | -
+|#3 |4060 + 4102 + 4339 |-  |- | -
+|#4 |4048 + 4015 + 4053 + 3352 |-  |- | -
+|#5 |3854 + 3737 + 3800 + 3734 |-  |- | -
+|===

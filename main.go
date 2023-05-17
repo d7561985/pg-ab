@@ -9,6 +9,7 @@ import (
 
 	"github.com/d7561985/pb-ab/cmd/postgres"
 	"github.com/d7561985/pb-ab/cmd/postgres/migrate"
+	_ "github.com/joho/godotenv/autoload"
 	"github.com/urfave/cli/v2" // imports as package "cli"
 )
 

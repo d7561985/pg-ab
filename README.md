@@ -10,3 +10,5 @@ Postgresql >= 14.0
 
 ## How to
 Just be sure that you specify launch url
+
+# postgresql://billing:Q6WY67WAXzNBzEx7@product-ua-prod-billing.cluster-ckivmzbr7ama.eu-central-1.rds.amazonaws.com:5432/test
