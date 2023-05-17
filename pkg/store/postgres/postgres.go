@@ -5,7 +5,7 @@ import (
 
 	"github.com/d7561985/mongo-ab/pkg/changing"
 	"github.com/d7561985/pb-ab/internal/config"
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/pkg/errors"
 )
 
@@ -24,8 +24,7 @@ func New(ctx context.Context, cfg config.Postgres) (*Repo, error) {
 	}
 
 	c.MaxConns = maxCon
-
-	dbpool, err := pgxpool.ConnectConfig(ctx, c)
+	dbpool, err := pgxpool.NewWithConfig(ctx, c)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
